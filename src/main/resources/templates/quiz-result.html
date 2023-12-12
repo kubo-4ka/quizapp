@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<title>採点結果</title>
+<link rel="stylesheet"
+	href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+<link th:href="@{/css/dark-theme-3.css}" rel="stylesheet"
+	type="text/css">
+</head>
+<body>
+	<!-- ヘッダーを読み込む -->
+	<div th:replace="common/header :: header"></div>
+	<div class="container">
+		<h1 class="mt-5">採点結果</h1>
+		<!-- 		<p id="userScore">あなたのスコア: X / Y</p> -->
+		<p id="userScore"
+			th:text="'あなたのスコア: ' + ${userScore} + ' / ' + ${numOfQuestions}"></p>
+		<!-- 他の採点結果情報を表示する -->
+
+		<!-- 「問題数設定画面へ戻る」ボタン -->
+		<form action="/quiz/set-questions" method="get">
+			<button type="submit" class="btn btn-secondary">問題数設定画面へ戻る</button>
+		</form>
+	</div>
+	<!-- フッターを読み込む -->
+	<div th:replace="common/footer :: footer"></div>
+</body>
+</html>

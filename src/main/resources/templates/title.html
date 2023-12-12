@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<title>クイズアプリ - タイトル</title>
+<link rel="stylesheet"
+	href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+<!-- テーマスタイル用のlinkタグ -->
+<link id="themeStylesheet" th:href="@{/css/dark-theme-3.css}"
+	rel="stylesheet" type="text/css">
+</head>
+<body>
+	<!-- ヘッダーを読み込む -->
+	<div th:replace="common/header :: header_fragment"></div>
+	<div class="container">
+		<h1 class="mt-5">クイズアプリ</h1>
+		<!-- 「問題数設定へ進む」ボタン -->
+		<form action="/quiz/set-questions" method="get">
+			<button type="submit" class="btn btn-primary">問題数設定へ進む</button>
+		</form>
+	</div>
+	<!-- フッターを読み込む -->
+	<div th:replace="common/footer :: footer_fragment"></div>
+</body>
+</html>

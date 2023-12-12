@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<title>採点確認</title>
+<link rel="stylesheet"
+	href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+<link th:href="@{/css/dark-theme-3.css}" rel="stylesheet"
+	type="text/css">
+</head>
+<body>
+	<!-- ヘッダーを読み込む -->
+	<div th:replace="common/header :: header"></div>
+	<div class="container">
+		<h1 class="mt-5">採点してもよろしいですか？</h1>
+		<div class="row">
+			<div class="d-grid gap-2 d-md-block">
+				<form action="/quiz/question/last" method="get">
+					<button type="submit" class="btn btn-secondary">前に戻る</button>
+				</form>
+			</div>
+			<div class="d-grid gap-2 col-6 mx-auto">
+				<form action="/quiz/check-answer" method="get">
+					<button type="submit" class="btn btn-primary">採点する</button>
+				</form>
+			</div>
+		</div>
+	</div>
+
+	<!-- フッターを読み込む -->
+	<div th:replace="common/footer :: footer"></div>
+</body>
+</html>

@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<title>問題数設定</title>
+<link rel="stylesheet"
+	href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+<!-- テーマスタイル用のlinkタグ -->
+<link id="themeStylesheet" th:href="@{/css/dark-theme-3.css}"
+	rel="stylesheet" type="text/css">
+</head>
+<body>
+	<!-- ヘッダーを読み込む -->
+	<div th:replace="common/header :: header_fragment"></div>
+	<div class="container">
+		<h1 class="mt-5">問題数を設定してください</h1>
+		<form action="/quiz/start" method="get">
+			<div class="form-group">
+				<label for="numOfQuestions">問題数:</label>
+				<!-- <input type="number" class="form-control" name="numOfQuestions" min="1" max="10" required> -->
+				<input type="number" class="form-control" name="numOfQuestions" min="1" th:max="${maxQuestionCount}" required>
+			</div>
+			<button type="submit" class="btn btn-primary">スタート</button>
+		</form>
+	</div>
+	<!-- フッターを読み込む -->
+	<div th:replace="common/footer :: footer_fragment"></div>
+</body>
+</html>

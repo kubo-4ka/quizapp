@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<title>クイズ</title>
+<link rel="stylesheet"
+	href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+<link th:href="@{/css/dark-theme-3.css}" rel="stylesheet"
+	type="text/css">
+</head>
+<body>
+	<!-- ヘッダーを読み込む -->
+	<div th:replace="common/header :: header_fragment"></div>
+	<div class="container">
+		<hr>
+		<h6 class="mt-5"
+			th:text="'問題数 : ' + ${currentQuestionIndex} + '/' + ${numOfQuestions}"></h6>
+		<hr>
+		<h4>質問:</h4>
+		<h4 class="mt-5" th:text="${question.questionText}"></h4>
+		<form id="quizForm" action="/quiz/answer" method="post">
+			<div id="choices">
+				<!-- 選択肢の表示 -->
+				<div th:each="choice : ${choices}">
+					<input type="radio" th:id="${'choice-' + choice.id}"
+						th:name="selectedChoiceId" th:value="${choice.id}"
+						th:checked="${selectedChoiceIds != null and selectedChoiceIds.contains(choice.id)}">
+					<label th:for="${'choice-' + choice.id}"
+						th:text="${choice.choiceText}"></label><br>
+				</div>
+			</div>
+			<!-- currentQuestionId のための隠しフィールドを追加 -->
+			<input type="hidden" name="currentQuestionId"
+				th:value="${question.id}">
+			<!-- selectedChoiceId のための隠しフィールドを追加 -->
+			<input type="hidden" name="selectedChoiceId" id="selectedChoiceId">
+			<!-- currentQuestionIndex のための隠しフィールドを追加 -->
+			<input type="hidden" name="currentQuestionIndex"
+				th:value="${currentQuestionIndex}">
+			<button type="submit" class="btn btn-primary">回答する</button>
+		</form>
+		<hr>
+		<h4>解説:</h4>
+		<!-- 解説を表示 -->
+		<p id="explanation" style="display: none" th:if="${explanation}">
+			<span th:text="${explanation.explanationText}"></span>
+		</p>
+		<hr>
+		<!-- 前に戻るフォーム -->
+		<div class="btn-group mr-2" role="group"
+			aria-label="Previous Question Button">
+			<form id="previousQuestionForm" action="/quiz/previous-question"
+				method="get">
+				<!-- currentQuestionId のための非表示の入力フィールドを追加 -->
+				<input type="hidden" name="currentQuestionId"
+					th:value="${question.id}">
+				<button type="button" class="btn btn-secondary">前に戻る</button>
+			</form>
+		</div>
+		<!-- 次へ進むフォーム -->
+		<div class="btn-group" role="group" aria-label="Next Question Button">
+			<button id="nextQuestionBtn" class="btn btn-secondary">次へ進む</button>
+		</div>
+	</div>
+	<!-- フッターを読み込む -->
+	<div th:replace="common/footer :: footer_fragment"></div>
+	<!-- JavaScriptファイルを読み込む -->
+	<script src="/js/quiz.js"></script>
+	<script src="/js/ajax_set_choice.js"></script>
+    <script src="/js/randomize_choices.js"></script> <!-- 新しいスクリプトを追加 -->
+</body>
+</html>
