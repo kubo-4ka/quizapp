@@ -1,10 +1,10 @@
 
-spring.datasource.url=${DB_URL}
-spring.datasource.username=${DB_USERNAME}
-spring.datasource.password=${DB_PASSWORD}
+spring.datasource.url=jdbc:postgresql://localhost:5432/quizappdb
+spring.datasource.username=postgres
+spring.datasource.password=postgres
 spring.datasource.driver-class-name=org.postgresql.Driver
 
-#logging.level.root=DEBUG
+logging.level.root=DEBUG
 
 server.tomcat.accesslog.enabled=true
 server.tomcat.basedir=tomcat
