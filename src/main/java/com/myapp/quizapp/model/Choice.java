@@ -1,5 +1,6 @@
 package com.myapp.quizapp.model;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -22,13 +23,12 @@ public class Choice {
 	@JoinColumn(name = "question_id")
 	private Question question;
 
-//    // getQuestionId() メソッド
-//    public int getQuestionId() {
-//        return question.getId();
-//    }
-//
-//    // setQuestionId(int) メソッド
-//    public void setQuestionId(int questionId) {
-//        this.question.id = questionId;
-//    }
+	@Column(name = "is_correct") // データベースのカラム名とフィールドをマッピング
+	private boolean isCorrect; // 正解かどうかを示すフィールドを追加
+
+	// 正解かどうかを判定するメソッド
+	public boolean isCorrect() {
+		return isCorrect;
+	}
+
 }

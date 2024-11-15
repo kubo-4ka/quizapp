@@ -11,6 +11,5 @@ public interface QuestionService {
     void deleteQuestion(long id);
     public Long getTotalQuestionCount();
 	List<Question> getRandomQuestions(int count);
-	List<Question> getAllRandomQuestions();
 
 }

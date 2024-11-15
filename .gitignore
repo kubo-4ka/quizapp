@@ -46,3 +46,6 @@ Thumbs.db
 *.log
 *.swp
 *.bak
+
+# prohibited for security reasons
+application.properties
