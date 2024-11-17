@@ -1,0 +1,31 @@
+/* title-page.css */
+
+/* タイトルページ全体のスタイル */
+body {
+    background-color: #222222; /* ダークテーマの背景色 */
+    color: #ffffff; /* テキストを白色に */
+}
+
+/* クイズテーマのカードスタイル */
+.theme-card {
+    border: 1px solid #ffffff; /* 白い枠線 */
+    border-radius: 10px; /* 角を丸く */
+    padding: 20px; /* 内側の余白 */
+    margin: 10px 0; /* 上下の余白 */
+    background-color: rgba(255, 255, 255, 0.1); /* 背景をわずかに白く */
+}
+
+/* カードのタイトルと説明のスタイル */
+.theme-card h3 {
+    color: #ffffff;
+}
+
+.theme-card p {
+    color: #ffffff;
+}
+
+/* ボタンスタイルのカスタマイズ */
+button.btn-primary {
+    background-color: #337ab7; /* プライマリボタンのカスタム色 */
+    border-color: #2e6da4;
+}

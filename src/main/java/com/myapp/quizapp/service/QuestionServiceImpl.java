@@ -4,7 +4,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -12,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.myapp.quizapp.model.Question;
-import com.myapp.quizapp.model.QuestionType;
 import com.myapp.quizapp.repositories.QuestionRepository;
 
 @Service
@@ -49,27 +47,23 @@ public class QuestionServiceImpl implements QuestionService {
 		}
 	}
 
+	// 新しいメソッド: テーマIDに基づいてランダムな質問を取得
 	@Override
-	public List<Question> getRandomQuestions(int count) {
-		// ランダムな質問を取得するロジックを実装
-		// ここでは例として、単純にすべての質問を取得してシャッフルしていますが、
-		// 実際のプロダクションコードではデータベースやランダムサンプリングのための適切なクエリを使用することをお勧めします。
-		List<Question> allQuestions = questionRepository.findAll();
-		Collections.shuffle(allQuestions);
+	public List<Question> getRandomQuestions(int count, long themeId) {
+		// テーマIDに基づいて質問を取得
+		List<Question> questionsByTheme = questionRepository.findByThemeId(themeId);
+		Collections.shuffle(questionsByTheme);
 
-		// countが実際の質問数より大きい場合は、すべての質問を返すことも考えられますが、
-		// ここではcountに指定された数だけ取得するようにしています。
-		return allQuestions.subList(0, Math.min(count, allQuestions.size()));
+		// countが質問数より大きい場合は、すべての質問を返す
+		return questionsByTheme.subList(0, Math.min(count, questionsByTheme.size()));
 	}
 
-	// 質問タイプに基づいて質問を取得するメソッドを追加
-	public List<Question> getQuestionsByType(QuestionType questionType) {
-		return questionRepository.findAll().stream()
-			.filter(question -> question.getQuestionType() == questionType)
-			.collect(Collectors.toList());
-	}
+    // テーマIDに基づいて質問数を取得
+    public Long getQuestionCountByThemeId(long themeId) {
+        return questionRepository.countByThemeId(themeId);
+    }
 
-	@Override
+    @Override
 	public void saveQuestion(Question question) {
 		questionRepository.save(question);
 	}

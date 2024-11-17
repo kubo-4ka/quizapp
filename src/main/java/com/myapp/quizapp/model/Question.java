@@ -11,6 +11,8 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import lombok.Getter;
@@ -40,6 +42,11 @@ public class Question {
 	@OneToMany(mappedBy = "question", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
 	private List<Choice> choices;
 
+	// Themeへの外部参照
+    @ManyToOne
+    @JoinColumn(name = "theme_id", nullable = false)
+    private Theme theme;
+	
 	// 追加: 複数選択問題の正解IDリストを取得するメソッド
 	public List<Integer> getCorrectAnswerIds() {
 		// choices リストから、正解の選択肢IDを抽出する

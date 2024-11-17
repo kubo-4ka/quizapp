@@ -7,16 +7,32 @@
 <!-- テーマスタイル用のlinkタグ -->
 <link id="themeStylesheet" th:href="@{/css/dark-theme-3.css}"
 	rel="stylesheet" type="text/css">
+<!-- タイトルページ専用のスタイル -->
+<link rel="stylesheet" th:href="@{/css/title-page.css}" type="text/css">
+<!-- 共通のスタイル -->
+<link rel="stylesheet" th:href="@{/css/common.css}" type="text/css">
+
 </head>
 <body>
 	<!-- ヘッダーを読み込む -->
 	<div th:replace="common/header :: header_fragment"></div>
 	<div class="container">
 		<h1 class="mt-5">クイズアプリ</h1>
-		<!-- 「問題数設定へ進む」ボタン -->
-		<form action="/quiz/set-questions" method="get">
-			<button type="submit" class="btn btn-primary">問題数設定へ進む</button>
-		</form>
+		<h5 class="mt-5">注意：動作確認のためにChatGPT生成のクイズを未検証のまま登録しており、間違い、正誤不整合の可能性があります。</h5>
+		<!-- クイズテーマの表 -->
+		<div class="container">
+			<h1 class="mt-5">クイズテーマを選択</h1>
+			<div class="row">
+				<div class="col-12 col-md-4 theme-card mb-4" th:each="theme : ${themes}">
+					<h3 th:text="${theme.name}"></h3>
+					<p th:text="${theme.description}"></p>
+					<form th:action="@{/quiz/set-questions}" method="get">
+						<input type="hidden" name="themeId" th:value="${theme.id}">
+						<button type="submit" class="btn btn-primary">問題数設定へ進む</button>
+					</form>
+				</div>
+			</div>
+		</div>
 	</div>
 	<!-- フッターを読み込む -->
 	<div th:replace="common/footer :: footer_fragment"></div>

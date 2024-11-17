@@ -10,6 +10,7 @@ public interface QuestionService {
     void saveQuestion(Question question);
     void deleteQuestion(long id);
     public Long getTotalQuestionCount();
-	List<Question> getRandomQuestions(int count);
+	List<Question> getRandomQuestions(int count, long themeId);
+    public Long getQuestionCountByThemeId(long themeId);
 
 }

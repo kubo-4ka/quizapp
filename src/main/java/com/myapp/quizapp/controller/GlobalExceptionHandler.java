@@ -12,8 +12,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ModelAndView handleException(Exception ex) {
 		Logger logger = LogManager.getLogger();
-		logger.trace("Start");
-		logger.error("エラー", ex);
+		logger.error("★★★GlobalExceptionHandler★★★", ex);
 		System.out.print(ex);
         // エラーログの記録などの処理を行う
         // カスタムエラーメッセージを表示する ModelAndView を構築する

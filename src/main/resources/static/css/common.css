@@ -1,0 +1,39 @@
+/* common.css */
+html, body {
+	height: 100%;
+}
+
+/* 文字サイズの調整 */
+@media ( max-width : 768px) {
+	h1 {
+		font-size: 1.5rem;
+	}
+	h3 {
+		font-size: 1.2rem;
+	}
+	p {
+		font-size: 1rem;
+	}
+	.btn {
+		font-size: 0.9rem;
+		padding: 0.5rem 1rem;
+	}
+}
+
+/* フッターの調整 */
+.footer {
+	position: sticky;
+	top: 100vh;
+	top: 100dvh;
+	bottom: 0;
+	background-color: #333333;
+	color: #ffffff;
+	padding: 0.5rem;
+	text-align: center;
+	margin-top: 30px;
+}
+
+/* ボタンの余白調整 */
+.theme-card button {
+	margin-top: 10px;
+}

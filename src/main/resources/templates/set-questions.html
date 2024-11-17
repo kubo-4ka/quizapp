@@ -7,18 +7,32 @@
 <!-- テーマスタイル用のlinkタグ -->
 <link id="themeStylesheet" th:href="@{/css/dark-theme-3.css}"
 	rel="stylesheet" type="text/css">
+<!-- 共通のスタイル -->
+<link rel="stylesheet" th:href="@{/css/common.css}" type="text/css">
+
 </head>
 <body>
 	<!-- ヘッダーを読み込む -->
 	<div th:replace="common/header :: header_fragment"></div>
 	<div class="container">
 		<h1 class="mt-5">問題数を設定してください</h1>
+		<p>
+			選択中のテーマ: <span th:text="${themeName}"></span>
+		</p>
+		<p>
+			最大問題数: <span th:text="${maxQuestionCount}"></span>
+		</p>
+
 		<form action="/quiz/start" method="get">
 			<div class="form-group">
 				<label for="numOfQuestions">問題数:</label>
 				<!-- <input type="number" class="form-control" name="numOfQuestions" min="1" max="10" required> -->
-				<input type="number" class="form-control" name="numOfQuestions" min="1" th:max="${maxQuestionCount}" required>
+				<input type="number" class="form-control" name="numOfQuestions"
+					min="1" th:max="${maxQuestionCount}" required>
 			</div>
+			<!-- themeId を隠しフィールドとして追加 -->
+			<input type="hidden" name="themeId" th:value="${themeId}">
+
 			<button type="submit" class="btn btn-primary">スタート</button>
 		</form>
 	</div>

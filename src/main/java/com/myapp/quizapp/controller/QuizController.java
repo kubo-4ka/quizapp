@@ -22,10 +22,12 @@ import com.myapp.quizapp.model.Choice;
 import com.myapp.quizapp.model.Explanation;
 import com.myapp.quizapp.model.Question;
 import com.myapp.quizapp.model.QuestionType; // 追加
+import com.myapp.quizapp.model.Theme;
 import com.myapp.quizapp.service.ChoiceService;
 import com.myapp.quizapp.service.ExplanationService;
 import com.myapp.quizapp.service.QuestionService;
 import com.myapp.quizapp.service.QuizScoring;
+import com.myapp.quizapp.service.ThemeService;
 
 import jakarta.servlet.http.HttpSession;
 
@@ -44,37 +46,55 @@ public class QuizController {
 	@Autowired
 	private QuizScoring quizScoring;
 
-	@GetMapping("/quiz/set-questions")
-	public String showQuizSetQuestionsPage(HttpSession session, Model model) {
-		Logger logger = LogManager.getLogger();
-		logger.trace("Start");
+	@Autowired
+	private ThemeService themeService;
 
-		// 問題数の上限を取得
-		Long maxQuestionCount = questionService.getTotalQuestionCount();
-		logger.error("maxQuestionCount ; " + maxQuestionCount);
+	@GetMapping("/quiz/set-questions")
+	public String showQuizSetQuestionsPage(@RequestParam("themeId") long themeId, HttpSession session, Model model) {
+		Logger logger = LogManager.getLogger();
+		logger.error("★ ★ ★showQuizSetQuestionsPage Start");
+
+		// テーマ情報を取得
+		Theme selectedTheme = themeService.getThemeById(themeId);
+		model.addAttribute("themeName", selectedTheme.getName());
+		
+		// テーマIDに基づいて問題数の上限を取得
+		Long maxQuestionCount = questionService.getQuestionCountByThemeId(themeId);
+		logger.error("★maxQuestionCount ; " + maxQuestionCount);
+		logger.error("★themeId ; " + themeId);
 
 		// 問題数の上限をビューに渡す
 		model.addAttribute("maxQuestionCount", maxQuestionCount);
 
+		// テーマIDをビューに渡す
+		model.addAttribute("themeId", themeId);
+
 		// セッションに numOfQuestions を保存
 		session.setAttribute("maxQuestionCount", maxQuestionCount);
 
-		return "set-questions"; // set-questions.html のファイル名
-	}
+		// セッションに themeId を保存
+		session.setAttribute("themeId", themeId);
 
-	@GetMapping("/set-questions")
-	public String showSetQuestionsPage() {
 		return "set-questions"; // set-questions.html のファイル名
 	}
 
 	@GetMapping("/quiz/start")
-	public String startQuiz(@RequestParam(name = "numOfQuestions") int numOfQuestions, HttpSession session,
+	public String startQuiz(@RequestParam(name = "numOfQuestions") int numOfQuestions,
+			@RequestParam(name = "themeId", required = false, defaultValue = "0") long themeId, HttpSession session,
 			Model model) {
+
+		if (themeId == 0) {
+			// デフォルトのテーマIDが0の場合に対するエラーハンドリングを実装
+			throw new IllegalArgumentException("テーマIDが無効です");
+		}
 		Logger logger = LogManager.getLogger();
-		logger.trace("Start");
+		logger.error("★startQuiz Start");
 
 		// numOfQuestions には選択した問題数が含まれます
 		logger.error("★★★numOfQuestions : " + numOfQuestions);
+
+		// themeId には選択した問題数が含まれます
+		logger.error("★★★themeId : " + themeId);
 
 		// 択一用のリストを初期化（問題数と同じサイズで null 値を持つリスト）
 		List<Integer> selectedChoiceIds = new ArrayList<>(Collections.nCopies(numOfQuestions, null));
@@ -90,7 +110,7 @@ public class QuizController {
 		Integer currentQuestionIndex = 1; // 最初の質問なので1
 
 		// ランダムな順序で質問を取得
-		List<Question> randomQuestions = questionService.getRandomQuestions(numOfQuestions);
+		List<Question> randomQuestions = questionService.getRandomQuestions(numOfQuestions, themeId);
 		logger.error("★★★randomQuestions.size() : " + randomQuestions.size());
 
 		// 最初の質問を取得
@@ -119,6 +139,9 @@ public class QuizController {
 		// セッションに numOfQuestions を保存
 		session.setAttribute("numOfQuestions", numOfQuestions);
 
+		// セッションに themeId を保存
+		session.setAttribute("themeId", themeId);
+		
 		logger.error("★★randomQuestions.size() : " + randomQuestions.size());
 		logger.error("★★selectedChoiceIds.size() : " + selectedChoiceIds.size());
 		logger.error("★★selectedChoiceIdMultipleChoiceLists.size() : " + selectedChoiceIdMultipleChoiceLists.size());
@@ -220,11 +243,18 @@ public class QuizController {
 		// 今何問目かを取得
 		Integer currentQuestionIndex = (Integer) session.getAttribute("currentQuestionIndex");
 
+		// 1問目以外なら前の問題へ戻るためインデックスをデクリメント
+		if (currentQuestionIndex > 1) {
+			currentQuestionIndex--;
+			session.setAttribute("currentQuestionIndex", currentQuestionIndex);
+			logger.error("★★★★★★currentQuestionIndex : " + currentQuestionIndex);
+
+		}
+
 		// 次に遷移する currentQuestionIndex に対応する択複回答リストを抽出
 		List<Integer> selectedChoiceIdMultipleChoiceList = new ArrayList<>();
-		if (currentQuestionIndex != null && currentQuestionIndex > 1
-				&& currentQuestionIndex <= selectedChoiceIdMultipleChoiceLists.size()) {
-			selectedChoiceIdMultipleChoiceList = selectedChoiceIdMultipleChoiceLists.get(currentQuestionIndex - 2);
+		if (currentQuestionIndex != null && currentQuestionIndex <= selectedChoiceIdMultipleChoiceLists.size()) {
+			selectedChoiceIdMultipleChoiceList = selectedChoiceIdMultipleChoiceLists.get(currentQuestionIndex - 1);
 		}
 		logger.error("★★★★★★currentQuestionIndex : " + currentQuestionIndex);
 		logger.error("★★★★★★selectedChoiceIdMultipleChoiceList : " + selectedChoiceIdMultipleChoiceList);
@@ -237,29 +267,19 @@ public class QuizController {
 
 		// 択複用：文字列としてビューに渡す
 		redirectAttributes.addFlashAttribute("selectedChoiceIdMultipleChoiceList", selectedChoiceIdMultipleChoiceList);
-		redirectAttributes.addFlashAttribute("selectedChoiceIdMultipleChoiceListString", selectedChoiceIdMultipleChoiceListString);
+		redirectAttributes.addFlashAttribute("selectedChoiceIdMultipleChoiceListString",
+				selectedChoiceIdMultipleChoiceListString);
 		session.setAttribute("selectedChoiceIdMultipleChoiceListString", selectedChoiceIdMultipleChoiceListString);
-		model.addAttribute("testlst", selectedChoiceIdMultipleChoiceList);
-		model.addAttribute("teststr", "aaa");
-		redirectAttributes.addFlashAttribute("testlst", selectedChoiceIdMultipleChoiceList);
-		redirectAttributes.addFlashAttribute("teststr", "bbb");
-		model.addAttribute("testids", selectedChoiceIds);
+//		model.addAttribute("testlst", selectedChoiceIdMultipleChoiceList);
+//		model.addAttribute("teststr", "aaa");
+//		redirectAttributes.addFlashAttribute("testlst", selectedChoiceIdMultipleChoiceList);
+//		redirectAttributes.addFlashAttribute("teststr", "bbb");
+//		model.addAttribute("testids", selectedChoiceIds);
 
 		// 択一用：ビューにデータを渡す
-		model.addAttribute("selectedChoiceIds", selectedChoiceIds);
+//		model.addAttribute("selectedChoiceIds", selectedChoiceIds);
 
-		// 前の問題へ戻る処理
-		if (currentQuestionIndex > 1) {
-			// インデックスをデクリメント
-			currentQuestionIndex--;
-			session.setAttribute("currentQuestionIndex", currentQuestionIndex);
-			logger.error("★★★★★★currentQuestionIndex : " + currentQuestionIndex);
-
-			// 前の問題へリダイレクト
-			return "redirect:/quiz/question/" + currentQuestionIndex;
-		}
-
-		// 最初の問題にいる場合は、そのまま表示
+		// 前の問題へリダイレクト。最初の問題にいる場合は、そのまま表示
 		return "redirect:/quiz/question/" + currentQuestionIndex;
 	}
 
@@ -311,17 +331,19 @@ public class QuizController {
 
 		// 択複用：文字列としてビューに渡す
 		redirectAttributes.addFlashAttribute("selectedChoiceIdMultipleChoiceList", selectedChoiceIdMultipleChoiceList);
-		redirectAttributes.addFlashAttribute("selectedChoiceIdMultipleChoiceListString", selectedChoiceIdMultipleChoiceListString);
-		session.setAttribute("selectedChoiceIdMultipleChoiceListString", selectedChoiceIdMultipleChoiceListString);
-		model.addAttribute("testlst", selectedChoiceIdMultipleChoiceList);
-		model.addAttribute("teststr", "aaa");
-		redirectAttributes.addFlashAttribute("testlst", selectedChoiceIdMultipleChoiceList);
-		redirectAttributes.addFlashAttribute("teststr", "bbb");
-		model.addAttribute("testids", selectedChoiceIds);
-		
+		redirectAttributes.addFlashAttribute("selectedChoiceIdMultipleChoiceListString",
+				selectedChoiceIdMultipleChoiceListString);
+		model.addAttribute("selectedChoiceIdMultipleChoiceList", selectedChoiceIdMultipleChoiceList);
+		model.addAttribute("selectedChoiceIdMultipleChoiceListString", selectedChoiceIdMultipleChoiceListString);
+//		model.addAttribute("teststr", "aaa");
+//		redirectAttributes.addFlashAttribute("testlst", selectedChoiceIdMultipleChoiceList);
+//		redirectAttributes.addFlashAttribute("teststr", "bbb");
+//		model.addAttribute("testids", selectedChoiceIds);
+
 		// セッションに選択リストを保存
 		session.setAttribute("selectedChoiceIds", selectedChoiceIds);
 		session.setAttribute("selectedChoiceIdMultipleChoiceLists", selectedChoiceIdMultipleChoiceLists);
+		session.setAttribute("selectedChoiceIdMultipleChoiceListString", selectedChoiceIdMultipleChoiceListString);
 
 		// 次の質問に進む処理
 		if (currentQuestionIndex < numOfQuestions) {
@@ -333,13 +355,13 @@ public class QuizController {
 			// 次の問題へリダイレクト
 			return "redirect:/quiz/question/" + currentQuestionIndex;
 		} else {
-			// 最後の問題にいる場合は、結果ページへリダイレクト
+			// 最後の問題にいる場合は、確認ページへリダイレクト
 			return "confirm-scoring";
 		}
 	}
 
 	@GetMapping("/quiz/question/last")
-	public String getLastQuestion(HttpSession session, Model model) {
+	public String getLastQuestion(HttpSession session, RedirectAttributes redirectAttributes) {
 		Logger logger = LogManager.getLogger();
 		logger.error("★★★★★last-question Start");
 
@@ -369,9 +391,8 @@ public class QuizController {
 
 		// 次に遷移する currentQuestionIndex に対応する択複回答リストを抽出
 		List<Integer> selectedChoiceIdMultipleChoiceList = new ArrayList<>();
-		if (currentQuestionIndex != null && currentQuestionIndex > 1
-				&& currentQuestionIndex <= selectedChoiceIdMultipleChoiceLists.size()) {
-			selectedChoiceIdMultipleChoiceList = selectedChoiceIdMultipleChoiceLists.get(currentQuestionIndex - 2);
+		if (currentQuestionIndex != null && currentQuestionIndex <= selectedChoiceIdMultipleChoiceLists.size()) {
+			selectedChoiceIdMultipleChoiceList = selectedChoiceIdMultipleChoiceLists.get(currentQuestionIndex - 1);
 		}
 		logger.error("★★★★★currentQuestionIndex : " + currentQuestionIndex);
 		logger.error("★★★★★selectedChoiceIdMultipleChoiceList : " + selectedChoiceIdMultipleChoiceList);
@@ -383,10 +404,11 @@ public class QuizController {
 		logger.error("★★★★★★selectedChoiceIdMultipleChoiceListString : " + selectedChoiceIdMultipleChoiceListString);
 
 		// 択複用：文字列としてビューに渡す
-		model.addAttribute("selectedChoiceIdMultipleChoiceListString", selectedChoiceIdMultipleChoiceListString);
+		redirectAttributes.addFlashAttribute("selectedChoiceIdMultipleChoiceListString",
+				selectedChoiceIdMultipleChoiceListString);
 
 		// 択一用：ビューにデータを渡す
-		model.addAttribute("selectedChoiceIds", selectedChoiceIds);
+		redirectAttributes.addFlashAttribute("selectedChoiceIds", selectedChoiceIds);
 
 		// 最後の問題にリダイレクト
 		return "redirect:/quiz/question/" + currentQuestionIndex;
@@ -531,15 +553,23 @@ public class QuizController {
 
 		// セッションから採点結果を取得
 		Integer userScore = (Integer) session.getAttribute("userScore");
+		logger.error("★★★ userScore：" + userScore);
 
 		// セッションから質問数を取得
 		Integer numOfQuestions = (Integer) session.getAttribute("numOfQuestions");
+		logger.error("★★★ numOfQuestions：" + numOfQuestions);
+
+		// セッションから質問数を取得
+		long themeId = (long) session.getAttribute("themeId");
+		logger.error("★★★ themeId：" + themeId);
 
 		// 必要に応じて他の採点結果情報も取得
 
 		// ビューに採点結果と質問数を渡す
 		model.addAttribute("userScore", userScore);
 		model.addAttribute("numOfQuestions", numOfQuestions);
+		// ビューにthemeIdを渡す
+		model.addAttribute("themeId", themeId);
 
 		// セッションから回答済みの選択肢リストを取得
 		List<Integer> selectedChoiceIds = (List<Integer>) session.getAttribute("selectedChoiceIds");
