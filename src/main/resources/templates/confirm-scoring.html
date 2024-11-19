@@ -14,20 +14,21 @@
 	<div th:replace="common/header :: header"></div>
 	<div class="container">
 		<h1 class="mt-5">採点してもよろしいですか？</h1>
-		<div class="row">
-			<div class="d-grid gap-2 d-md-block">
+		<div class="row mt-4">
+			<!-- 左端に配置する「前に戻る」ボタン -->
+			<div class="col text-left">
 				<form action="/quiz/question/last" method="get">
 					<button type="submit" class="btn btn-secondary">前に戻る</button>
 				</form>
 			</div>
-			<div class="d-grid gap-2 col-6 mx-auto">
+			<!-- 右端に配置する「採点する」ボタン -->
+			<div class="col text-right">
 				<form action="/quiz/check-answer" method="get">
 					<button type="submit" class="btn btn-primary">採点する</button>
 				</form>
 			</div>
 		</div>
 	</div>
-
 	<!-- フッターを読み込む -->
 	<div th:replace="common/footer :: footer"></div>
 </body>

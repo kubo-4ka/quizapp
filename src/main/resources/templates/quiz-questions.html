@@ -20,7 +20,9 @@
 		<h4>質問:</h4>
 		<h4 class="mt-5" th:text="${question.questionText}"></h4>
 		<form id="quizForm" action="/quiz/answer" method="post">
-			<div id="choices">
+			<!-- CSRF トークンを埋め込む -->
+			<!-- 			<input type="hidden" name="_csrf" th:value="${_csrf.token}" /> -->
+			<div id="choices" class="mb-4">
 				<!-- 選択肢の表示（シングル選択肢用） -->
 				<div th:if="${question.isSingleChoice}">
 					<div th:each="choice : ${choices}">
@@ -38,9 +40,9 @@
 						<input type="checkbox" th:id="${'choice-' + choice.id}"
 							th:name="selectedChoiceIdMultipleChoiceList[]"
 							th:value="${choice.id}"
- 							th:checked="${selectedChoiceIdMultipleChoiceListString != null} and ${#strings.contains(selectedChoiceIdMultipleChoiceListString, choice.id.toString())}">
-<!-- 							th:checked="${#strings.isEmpty(selectedChoiceIdMultipleChoiceListString)}"> -->
-<!-- 							th:checked="${choice.id == #strings.contains(selectedChoiceIdMultipleChoiceListString)}"> -->
+							th:checked="${selectedChoiceIdMultipleChoiceListString != null} and ${#strings.contains(selectedChoiceIdMultipleChoiceListString, choice.id.toString())}">
+						<!-- 							th:checked="${#strings.isEmpty(selectedChoiceIdMultipleChoiceListString)}"> -->
+						<!-- 							th:checked="${choice.id == #strings.contains(selectedChoiceIdMultipleChoiceListString)}"> -->
 						<label th:for="${'choice-' + choice.id}"
 							th:text="${choice.choiceText}"></label><br>
 					</div>
@@ -48,25 +50,23 @@
 			</div>
 
 			<!-- 複数選択肢内容確認用の隠しフィールドを追加 -->
-			<input type="hidden" id="selectedChoiceIdMultipleChoiceListValue" name="selectedChoiceIdMultipleChoiceListValue" th:value="${selectedChoiceIdMultipleChoiceListString}">
+			<input type="hidden" id="selectedChoiceIdMultipleChoiceListValue"
+				name="selectedChoiceIdMultipleChoiceListValue"
+				th:value="${selectedChoiceIdMultipleChoiceListString}">
 
 			<!-- selectedChoiceIdMultipleChoiceListString確認用の隠しフィールドを追加 -->
-			<input type="hidden" id="selectedChoiceIdMultipleChoiceListString" name="selectedChoiceIdMultipleChoiceListString" th:value="${selectedChoiceIdMultipleChoiceListString}">
-
-			<!-- testlst確認用の隠しフィールドを追加 -->
-			<input type="hidden" id="testlst" name="testlst" th:value="${testlst}">
-
-			<!-- teststr確認用の隠しフィールドを追加 -->
-			<input type="hidden" id="teststr" name="teststr" th:value="${teststr}">
-
-			<!-- testids確認用の隠しフィールドを追加 -->
-			<input type="hidden" id="testids" name="testids" th:value="${testids}">
+			<input type="hidden" id="selectedChoiceIdMultipleChoiceListString"
+				name="selectedChoiceIdMultipleChoiceListString"
+				th:value="${selectedChoiceIdMultipleChoiceListString}">
 
 			<!-- selectedChoiceIdMultipleChoiceList確認用の隠しフィールドを追加 -->
-			<input type="hidden" id="selectedChoiceIdMultipleChoiceList" name="selectedChoiceIdMultipleChoiceList" th:value="${selectedChoiceIdMultipleChoiceList}">
+			<input type="hidden" id="selectedChoiceIdMultipleChoiceList"
+				name="selectedChoiceIdMultipleChoiceList"
+				th:value="${selectedChoiceIdMultipleChoiceList}">
 
 			<!-- question.isSingleChoice確認用の隠しフィールドを追加 -->
-			<input type="hidden" id="isSingleChoice" name="isSingleChoice" th:value="${question.isSingleChoice}">
+			<input type="hidden" id="isSingleChoice" name="isSingleChoice"
+				th:value="${question.isSingleChoice}">
 
 			<!-- currentQuestionId のための隠しフィールドを追加 -->
 			<input type="hidden" name="currentQuestionId"
@@ -74,7 +74,8 @@
 			<!-- selectedChoiceId のための隠しフィールドを追加 -->
 			<input type="hidden" name="selectedChoiceId" id="selectedChoiceId">
 			<!-- 択複の場合の隠しフィールドを追加 -->
-			<input type="hidden" name="selectedChoiceIdMultipleChoiceList[]" id="selectedChoiceIdMultipleChoiceList">
+			<input type="hidden" name="selectedChoiceIdMultipleChoiceList[]"
+				id="selectedChoiceIdMultipleChoiceList">
 			<!-- currentQuestionIndex のための隠しフィールドを追加 -->
 			<input type="hidden" name="currentQuestionIndex"
 				th:value="${currentQuestionIndex}">
@@ -88,19 +89,22 @@
 		</p>
 		<hr>
 		<!-- 前に戻るフォーム -->
-		<div class="btn-group mr-2" role="group"
-			aria-label="Previous Question Button">
-			<form id="previousQuestionForm" action="/quiz/previous-question"
-				method="get">
-				<!-- currentQuestionId のための非表示の入力フィールドを追加 -->
-				<input type="hidden" name="currentQuestionId"
-					th:value="${question.id}">
-				<button type="button" class="btn btn-secondary">前に戻る</button>
-			</form>
-		</div>
-		<!-- 次へ進むフォーム -->
-		<div class="btn-group" role="group" aria-label="Next Question Button">
-			<button id="nextQuestionBtn" class="btn btn-secondary">次へ進む</button>
+		<div class="row">
+			<!-- 左端に配置するためのカラム -->
+			<div class="col text-left">
+				<form id="previousQuestionForm" action="/quiz/previous-question"
+					method="get">
+					<!-- currentQuestionId のための非表示の入力フィールドを追加 -->
+					<input type="hidden" name="currentQuestionId"
+						th:value="${question.id}">
+					<button type="button" class="btn btn-secondary">前に戻る</button>
+				</form>
+			</div>
+			<!-- 次へ進むフォーム -->
+			<!-- 右端に配置するためのカラム -->
+			<div class="col text-right">
+				<button id="nextQuestionBtn" class="btn btn-secondary">次へ進む</button>
+			</div>
 		</div>
 	</div>
 	<!-- フッターを読み込む -->

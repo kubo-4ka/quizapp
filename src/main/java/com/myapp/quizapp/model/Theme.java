@@ -1,5 +1,6 @@
 package com.myapp.quizapp.model;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -18,5 +19,7 @@ public class Theme {
     private String name;
     private String description;
 
-    // 必要に応じて、追加のメソッドを実装できます
+    @Column(name = "is_authentication_required") // データベースのカラム名とフィールドをマッピング
+    private Boolean isAuthenticationRequired; // 新しいフラグ
+
 }

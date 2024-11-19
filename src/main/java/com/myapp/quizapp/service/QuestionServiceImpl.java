@@ -34,7 +34,8 @@ public class QuestionServiceImpl implements QuestionService {
 	public Question getQuestionById(long id) {
 		Logger logger = LogManager.getLogger();
 		logger.trace("Start");
-		logger.error("id ; " + id);
+		logger.error("★id ; " + id);
+		logger.error("★choiceService ; " + choiceService);
 		Optional<Question> questionOptional = questionRepository.findById(id);
 
 		if (questionOptional.isPresent()) {
@@ -42,7 +43,7 @@ public class QuestionServiceImpl implements QuestionService {
 		} else {
 			// 値が存在しない場合のエラーハンドリング
 			// ログ出力
-			logger.error("Question with ID {} not found", id);
+			logger.error("★Question with ID {} not found", id);
 			throw new NoSuchElementException("Question with ID " + id + " not found");
 		}
 	}

@@ -37,3 +37,57 @@ html, body {
 .theme-card button {
 	margin-top: 10px;
 }
+
+/* ボタンの余白調整 */
+.mb-4 {
+    margin-bottom: 20px; /* 下に20pxの余白を追加 */
+}
+
+/* ダークテーマに適したテーブルのスタイル */
+table {
+    width: 100%;
+    border-collapse: collapse; /* セルの間に隙間を作らない */
+    background-color: #444444; /* 背景色：灰色系 */
+    color: #ffffff; /* 文字色：白系 */
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* 軽い影を追加 */
+}
+
+/* テーブルのヘッダーのスタイル */
+table th {
+    padding: 12px;
+    text-align: left;
+    background-color: #555555; /* 少し明るい灰色 */
+    color: #ffffff; /* 明るい文字色 */
+    font-weight: bold;
+}
+
+/* テーブルの行のスタイル */
+table td {
+    padding: 12px;
+    border-top: 1px solid #666666;
+    text-align: left;
+    color: #ffffff; /* 文字色を白に設定 */
+}
+
+/* 行の背景色を交互に変更して、視認性を向上させる */
+table tr:nth-child(even) {
+    background-color: #555555; /* 偶数行の背景色 */
+}
+
+/* 行がホバーされたときの効果 */
+table tr:hover {
+    background-color: #666666; /* ホバー時の背景色 */
+    cursor: pointer;
+}
+
+/* テーブルの枠線 */
+table, th, td {
+    border: 1px solid #777777; /* グレーの枠線 */
+}
+
+/* テーブルを中央寄せ */
+table {
+    margin-left: auto;
+    margin-right: auto;
+}

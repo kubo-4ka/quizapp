@@ -28,7 +28,7 @@ INSERT INTO explanation (id, question_id, explanation_text) VALUES
 -- オリンピッククイズの質問、選択肢、解説
 INSERT INTO question (id, question_text, correct_answer_id, question_type, theme_id) VALUES
 (21, 'オリンピックが最初に開催された都市は？', 102, 'SINGLE_CHOICE', 8),
-(22, '陸上競技で使用されるトラックの距離は何メートルか？', 103, 'SINGLE_CHOICE', 8);
+(22, '陸上競技で使用されるトラックの距離は何メートルか？', 106, 'SINGLE_CHOICE', 8);
 
 INSERT INTO choice (id, question_id, choice_text, is_correct) VALUES
 (102, 21, 'アテネ', true),

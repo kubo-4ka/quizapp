@@ -1,0 +1,4 @@
+CREATE TABLE roles (
+    id BIGSERIAL PRIMARY KEY, -- 役割ID
+    role_name VARCHAR(50) NOT NULL UNIQUE -- 役割名（例: ROLE_USER, ROLE_ADMIN など）
+);

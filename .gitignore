@@ -48,4 +48,4 @@ Thumbs.db
 *.bak
 
 # prohibited for security reasons
-application.properties
+#application.properties

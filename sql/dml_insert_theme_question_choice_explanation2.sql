@@ -50,8 +50,8 @@ INSERT INTO theme (id, name, description) VALUES
 (6, '世界の文化遺産クイズ', '世界各地の歴史的文化遺産について学びましょう。');
 
 INSERT INTO question (id, question_text, correct_answer_id, question_type, theme_id) VALUES
-(17, '中国の万里の長城は何世紀に建てられましたか？', 83, 'SINGLE_CHOICE', 6),
-(18, 'イタリアにある有名な文化遺産を2つ選んでください。', NULL, 'MULTIPLE_CHOICE', 6);
+(17, '中国の万里の長城は何世紀に建てられましたか？', 86, 'SINGLE_CHOICE', 6),
+(18, 'イタリアにある有名な文化遺産を3つ選んでください。', NULL, 'MULTIPLE_CHOICE', 6);
 
 INSERT INTO choice (id, question_id, choice_text, is_correct) VALUES
 (83, 17, '7世紀', false),
@@ -68,5 +68,5 @@ INSERT INTO choice (id, question_id, choice_text, is_correct) VALUES
 
 INSERT INTO explanation (id, question_id, explanation_text) VALUES
 (17, 17, '万里の長城は紀元前7世紀に建設が始まり、歴史的な防御壁として知られています。'),
-(18, 18, 'イタリアのコロッセオとピサの斜塔は、世界遺産に登録された有名な文化遺産です。');
+(18, 18, 'イタリアのコロッセオ、ピサの斜塔、システィーナ礼拝堂は、世界遺産に登録された有名な文化遺産です。');
 

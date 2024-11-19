@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.myapp.quizapp.model.AnswerStatus;
 import com.myapp.quizapp.model.Choice;
 import com.myapp.quizapp.model.Explanation;
 import com.myapp.quizapp.model.Question;
@@ -29,8 +30,10 @@ import com.myapp.quizapp.service.QuestionService;
 import com.myapp.quizapp.service.QuizScoring;
 import com.myapp.quizapp.service.ThemeService;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 
+@SuppressWarnings("unchecked")
 @Controller
 public class QuizController {
 
@@ -50,14 +53,22 @@ public class QuizController {
 	private ThemeService themeService;
 
 	@GetMapping("/quiz/set-questions")
-	public String showQuizSetQuestionsPage(@RequestParam("themeId") long themeId, HttpSession session, Model model) {
+	public String showQuizSetQuestionsPage(@RequestParam("themeId") long themeId, HttpSession session, Model model, HttpServletRequest request) {
 		Logger logger = LogManager.getLogger();
 		logger.error("★ ★ ★showQuizSetQuestionsPage Start");
 
 		// テーマ情報を取得
 		Theme selectedTheme = themeService.getThemeById(themeId);
 		model.addAttribute("themeName", selectedTheme.getName());
-		
+		logger.error("★selectedTheme.getIsAuthenticationRequired() ; " + selectedTheme.getIsAuthenticationRequired());
+		logger.error("★request.getUserPrincipal() ; " + request.getUserPrincipal());
+
+	    // 認証が必要なテーマの場合、ユーザーがログインしているかチェック
+//	    if (selectedTheme.getIsAuthenticationRequired() && request.getUserPrincipal() == null) {
+//	        // ログインページにリダイレクト
+//	        return "redirect:/quiz/login";
+//	    }
+
 		// テーマIDに基づいて問題数の上限を取得
 		Long maxQuestionCount = questionService.getQuestionCountByThemeId(themeId);
 		logger.error("★maxQuestionCount ; " + maxQuestionCount);
@@ -288,8 +299,8 @@ public class QuizController {
 		Logger logger = LogManager.getLogger();
 		logger.error("★★★next-question Start");
 
-		// セッションからランダムな質問を取得
-		List<Question> randomQuestions = (List<Question>) session.getAttribute("randomQuestions");
+//		// セッションからランダムな質問を取得
+//		List<Question> randomQuestions = (List<Question>) session.getAttribute("randomQuestions");
 
 		// 択一用：セッションからこれまでの選択結果リストを取得
 		List<Integer> selectedChoiceIds = (List<Integer>) session.getAttribute("selectedChoiceIds");
@@ -494,7 +505,6 @@ public class QuizController {
 	}
 
 	@GetMapping("/quiz/check-answer")
-
 	public String checkAnswer(HttpSession session, Model model) {
 		// 回答を確認する処理
 
@@ -511,6 +521,7 @@ public class QuizController {
 
 		// 採点結果を保持する変数
 		int userScore = 0;
+		List<AnswerStatus> answerStatuses = new ArrayList<>(); // 正誤情報を格納するリスト
 
 		// 質問リストをループして採点
 		for (int i = 0; i < randomQuestions.size(); i++) {
@@ -519,29 +530,35 @@ public class QuizController {
 			logger.error("★★★ randomQuestions.get(i)：" + randomQuestions.get(i));
 			logger.error("★★★ question.getQuestionType()：" + question.getQuestionType());
 
+			boolean isCorrect = false;
+
 			if (questionType == QuestionType.SINGLE_CHOICE) {
 				// 単一選択肢の採点
 				Integer selectedChoiceId = selectedChoiceIds != null && selectedChoiceIds.size() > i
 						? selectedChoiceIds.get(i)
 						: null;
-				if (quizScoring.isCorrectAnswer(question, selectedChoiceId)) {
-					userScore++;
-				}
+				isCorrect = quizScoring.isCorrectAnswer(question, selectedChoiceId);
 			} else if (questionType == QuestionType.MULTIPLE_CHOICE) {
 				// 複数選択肢の採点
 				List<Integer> selectedChoices = selectedChoiceIdMultipleChoiceLists != null
 						&& selectedChoiceIdMultipleChoiceLists.size() > i ? selectedChoiceIdMultipleChoiceLists.get(i)
 								: new ArrayList<>();
-				logger.error("★★★ selectedChoices：" + selectedChoices);
-				if (quizScoring.isCorrectAnswer(question, selectedChoices)) {
-					userScore++;
-				}
+				isCorrect = quizScoring.isCorrectAnswer(question, selectedChoices);
 			}
+
+			if (isCorrect) {
+				userScore++;
+			}
+
+			// 正誤情報をAnswerStatusに追加
+			AnswerStatus answerStatus = new AnswerStatus(i + 1, question.getQuestionText(), isCorrect ? "正解" : "不正解");
+			answerStatuses.add(answerStatus);
 		}
 
 		// 採点結果をセッションに保存
 		session.setAttribute("userScore", userScore);
 		logger.error("★★★ userScore : " + userScore);
+		session.setAttribute("answerStatuses", answerStatuses);
 
 		return "redirect:/quiz/quiz-result";
 	}
@@ -578,6 +595,10 @@ public class QuizController {
 		if (selectedChoiceIds != null && !selectedChoiceIds.isEmpty()) {
 			model.addAttribute("selectedChoiceIds", selectedChoiceIds);
 		}
+
+		// 正誤情報と質問をビューに渡す
+		List<AnswerStatus> answerStatuses = (List<AnswerStatus>) session.getAttribute("answerStatuses");
+		model.addAttribute("answerStatuses", answerStatuses);
 
 		return "quiz-result";
 	}

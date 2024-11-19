@@ -14,23 +14,41 @@
 	<div th:replace="common/header :: header"></div>
 	<div class="container">
 		<h1 class="mt-5">採点結果</h1>
-		<!-- 		<p id="userScore">あなたのスコア: X / Y</p> -->
-		<p id="userScore"
-			th:text="'あなたのスコア: ' + ${userScore} + ' / ' + ${numOfQuestions}"></p>
-		<!-- 他の採点結果情報を表示する -->
-		<div class="btn-group mr-2" role="group">
-			<!-- 「問題数設定画面へ戻る」ボタン -->
-			<form action="/quiz/set-questions" method="get">
-				<!-- themeId を隠しフィールドとして追加 -->
-				<input type="hidden" name="themeId" th:value="${themeId}">
-				<button type="submit" class="btn btn-secondary">問題数設定画面へ戻る</button>
-			</form>
-		</div>
-		<div class="btn-group" role="group">
-			<!-- 「タイトル画面へ戻る」ボタン -->
-			<form action="/" method="get">
-				<button type="submit" class="btn btn-secondary">タイトル画面へ戻る</button>
-			</form>
+<!-- 		<p id="userScore" th:text="'あなたのスコア: ' + ${userScore} + ' / ' + ${numOfQuestions}"></p> -->
+        <p>あなたのスコア: <span th:text="${userScore}">0</span> / <span th:text="${numOfQuestions}">0</span></p>
+
+        <h3>問題と正誤一覧</h3>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>No</th>
+                    <th>問題</th>
+                    <th>正誤</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="answerStatus : ${answerStatuses}">
+                    <td th:text="${answerStatus.questionNumber}"></td>
+                    <td th:text="${answerStatus.questionText}"></td>
+                    <td th:text="${answerStatus.correctOrIncorrect}"></td>
+                </tr>
+            </tbody>
+        </table>
+		<div class="row mt-4">
+			<!-- 左端に配置する「問題数設定画面へ戻る」ボタン -->
+			<div class="col text-left">
+				<form action="/quiz/set-questions" method="get">
+					<!-- themeId を隠しフィールドとして追加 -->
+					<input type="hidden" name="themeId" th:value="${themeId}">
+					<button type="submit" class="btn btn-secondary">問題数設定画面へ戻る</button>
+				</form>
+			</div>
+			<!-- 右端に配置する「タイトル画面へ戻る」ボタン -->
+			<div class="col text-right">
+				<form action="/" method="get">
+					<button type="submit" class="btn btn-secondary">タイトル画面へ戻る</button>
+				</form>
+			</div>
 		</div>
 	</div>
 	<!-- フッターを読み込む -->

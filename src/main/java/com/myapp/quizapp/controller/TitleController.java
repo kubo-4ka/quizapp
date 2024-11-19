@@ -1,10 +1,12 @@
 package com.myapp.quizapp.controller;
 
 import java.util.List;
+import java.util.Random;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -33,6 +35,23 @@ public class TitleController {
         model.addAttribute("themes", themes);
 		Logger logger = LogManager.getLogger();
 		logger.error("★ ★ ★TitleController getQuizTitlePage Start");
-        return "title"; // タイトル画面へ
+
+		// BCryptテスト
+		int length = 12;
+        String characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!#$%&()=-\\@+*/<>?:;,._";
+        Random random = new Random();
+        StringBuilder randomString = new StringBuilder();
+
+        for (int i = 0; i < length; i++) {
+            int index = random.nextInt(characters.length());
+            randomString.append(characters.charAt(index));
+        }
+        String rawPassword = randomString.toString(); // 生パスワード
+        BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+        String hashedPassword = passwordEncoder.encode(rawPassword);
+		logger.error("★raw ; " + rawPassword);
+		logger.error("★hashed ; " + hashedPassword);
+
+		return "title"; // タイトル画面へ
     }
 }
