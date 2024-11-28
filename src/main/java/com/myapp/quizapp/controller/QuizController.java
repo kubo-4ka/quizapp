@@ -538,6 +538,10 @@ public class QuizController {
 						? selectedChoiceIds.get(i)
 						: null;
 				isCorrect = quizScoring.isCorrectAnswer(question, selectedChoiceId);
+				logger.error("★★★ i：" + i);
+				logger.error("★★★ question：" + question);
+				logger.error("★★★ selectedChoiceId：" + selectedChoiceId);
+				logger.error("★★★ isCorrect：" + isCorrect);
 			} else if (questionType == QuestionType.MULTIPLE_CHOICE) {
 				// 複数選択肢の採点
 				List<Integer> selectedChoices = selectedChoiceIdMultipleChoiceLists != null
@@ -548,6 +552,7 @@ public class QuizController {
 
 			if (isCorrect) {
 				userScore++;
+				logger.error("★★★ userScore：" + userScore);
 			}
 
 			// 正誤情報をAnswerStatusに追加
@@ -557,7 +562,7 @@ public class QuizController {
 
 		// 採点結果をセッションに保存
 		session.setAttribute("userScore", userScore);
-		logger.error("★★★ userScore : " + userScore);
+		logger.error("★★★ total userScore : " + userScore);
 		session.setAttribute("answerStatuses", answerStatuses);
 
 		return "redirect:/quiz/quiz-result";

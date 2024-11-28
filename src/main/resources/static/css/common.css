@@ -91,3 +91,20 @@ table {
     margin-left: auto;
     margin-right: auto;
 }
+/* プログラミングコード部分を強調するために、<pre>と<code>にスタイルを追加 */
+pre {
+    background-color: #2e3440; /* ダークグレー */
+    border: 1px solid #4c566a; /* 明るいグレーの枠線 */
+    border-radius: 5px;       /* 角丸 */
+    color: #d8dee9;           /* 明るい文字色 */
+    font-family: "Courier New", Courier, monospace; /* 等幅フォント */
+    font-size: 1rem;          /* 適度な文字サイズ */
+    padding: 10px;            /* 内側余白 */
+    overflow-x: auto;         /* 横スクロール対応 */
+    white-space: pre-wrap;    /* 改行をそのまま反映 */
+}
+
+code {
+    color: #88c0d0;           /* シンタックス用文字色 */
+}
+

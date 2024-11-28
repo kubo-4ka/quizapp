@@ -18,7 +18,9 @@
 			th:text="'問題数 : ' + ${currentQuestionIndex} + '/' + ${numOfQuestions}"></h6>
 		<hr>
 		<h4>質問:</h4>
-		<h4 class="mt-5" th:text="${question.questionText}"></h4>
+		<!-- 改行をreplaceで表現 -->
+		<h4 class="mt-5"
+			th:utext="${#strings.replace(question.questionText, '\n', '<br>')}"></h4>
 		<form id="quizForm" action="/quiz/answer" method="post">
 			<!-- CSRF トークンを埋め込む -->
 			<!-- 			<input type="hidden" name="_csrf" th:value="${_csrf.token}" /> -->
@@ -30,7 +32,7 @@
 							th:name="selectedChoiceId" th:value="${choice.id}"
 							th:checked="${selectedChoiceIds != null and selectedChoiceIds.contains(choice.id)}">
 						<label th:for="${'choice-' + choice.id}"
-							th:text="${choice.choiceText}"></label><br>
+							th:utext="${#strings.replace(choice.choiceText, '\n', '<br>')}"></label><br>
 					</div>
 				</div>
 
@@ -44,7 +46,7 @@
 						<!-- 							th:checked="${#strings.isEmpty(selectedChoiceIdMultipleChoiceListString)}"> -->
 						<!-- 							th:checked="${choice.id == #strings.contains(selectedChoiceIdMultipleChoiceListString)}"> -->
 						<label th:for="${'choice-' + choice.id}"
-							th:text="${choice.choiceText}"></label><br>
+							th:utext="${#strings.replace(choice.choiceText, '\n', '<br>')}"></label><br>
 					</div>
 				</div>
 			</div>
@@ -84,10 +86,10 @@
 		<hr>
 		<h4>解説:</h4>
 		<!-- 解説を表示 -->
-		<p id="explanation" style="display: none" th:if="${explanation}">
-			<span th:text="${explanation.explanationText}"></span>
-		</p>
-		<hr>
+		<div id="explanation" style="display: none" th:if="${explanation}">
+			<p  id="explanation_p"><span th:utext="${#strings.replace(explanation.explanationText, '\n', '<br>')}">
+			</span></p>
+		</div><hr>
 		<!-- 前に戻るフォーム -->
 		<div class="row">
 			<!-- 左端に配置するためのカラム -->

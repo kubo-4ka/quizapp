@@ -49,7 +49,11 @@ public class QuizScoringImpl implements QuizScoring {
 			return false; // null の場合は不正解
 		}
 		// 基本データ型 `int` と `Integer` の比較
-		return question.getCorrectAnswerId() == selectedChoiceId;
+		logger.error("★★★★question.getCorrectAnswerId() : " + question.getCorrectAnswerId());
+		logger.error("★★★★selectedChoiceId              : " + selectedChoiceId);
+		logger.error("★★★★question.getCorrectAnswerId().getClass().getName() : " + question.getCorrectAnswerId().getClass().getName());
+		logger.error("★★★★selectedChoiceId.getClass().getName()              : " + selectedChoiceId.getClass().getName());
+		return question.getCorrectAnswerId().equals(selectedChoiceId);
 	}
 
 	@Override
