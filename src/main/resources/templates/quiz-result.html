@@ -13,27 +13,27 @@
 	<!-- ヘッダーを読み込む -->
 	<div th:replace="common/header :: header"></div>
 	<div class="container">
+		<div class="theme-info mt-3">
+			<h5>
+				クイズテーマ: <span th:text="${themeName}"></span>
+			</h5>
+			<!-- 			<p th:text="${themeDescription}"></p> -->
+		</div>
 		<h1 class="mt-5">採点結果</h1>
-<!-- 		<p id="userScore" th:text="'あなたのスコア: ' + ${userScore} + ' / ' + ${numOfQuestions}"></p> -->
-        <p>あなたのスコア: <span th:text="${userScore}">0</span> / <span th:text="${numOfQuestions}">0</span></p>
-
-        <h3>問題と正誤一覧</h3>
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>No</th>
-                    <th>問題</th>
-                    <th>正誤</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr th:each="answerStatus : ${answerStatuses}">
-                    <td th:text="${answerStatus.questionNumber}"></td>
-                    <td th:utext="${#strings.replace(answerStatus.questionText, '\n', '<br>')}"></td>
-                    <td th:text="${answerStatus.correctOrIncorrect}"></td>
-                </tr>
-            </tbody>
-        </table>
+		<!-- 		<p id="userScore" th:text="'あなたのスコア: ' + ${userScore} + ' / ' + ${numOfQuestions}"></p> -->
+		<div
+			class="d-flex justify-content-between align-items-center mt-4 p-3 rounded result-summary">
+			<h5 class="text-left">
+				あなたのスコア : <span th:text="${userScore}">0</span> / <span
+					th:text="${numOfQuestions}">0</span>
+			</h5>
+			<h5 class="text-center">
+				正答率 : <span th:text="${accuracyRate}">N/A</span>
+			</h5>
+			<h5 class="text-right">
+				クイズ所要時間 : <span th:text="${quizElapsedTime}">N/A</span>
+			</h5>
+		</div>
 		<div class="row mt-4">
 			<!-- 左端に配置する「問題数設定画面へ戻る」ボタン -->
 			<div class="col text-left">
@@ -50,6 +50,25 @@
 				</form>
 			</div>
 		</div>
+		<hr>
+		<h3>問題と正誤一覧</h3>
+		<table class="table">
+			<thead>
+				<tr>
+					<th>No</th>
+					<th>問題</th>
+					<th>正誤</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr th:each="answerStatus : ${answerStatuses}">
+					<td th:text="${answerStatus.questionNumber}"></td>
+					<td
+						th:utext="${#strings.replace(answerStatus.questionText, '\n', '<br>')}"></td>
+					<td th:text="${answerStatus.correctOrIncorrect}"></td>
+				</tr>
+			</tbody>
+		</table>
 	</div>
 	<!-- フッターを読み込む -->
 	<div th:replace="common/footer :: footer"></div>

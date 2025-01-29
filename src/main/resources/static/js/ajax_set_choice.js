@@ -5,6 +5,12 @@ $(document).ready(function() {
 		submitQuizForm("/quiz/previous-question");
 	});
 
+	// "採点確認画面へ進む" ボタンがクリックされたときの処理
+	$("#confirmScoringBtn").on("click", function(event) {
+		event.preventDefault();
+		submitQuizForm("/quiz/confirm-scoring-direct");
+	});
+
 	// "次へ進む" ボタンがクリックされたときの処理
 	$("#nextQuestionBtn").on("click", function(event) {
 		event.preventDefault();

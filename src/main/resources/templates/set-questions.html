@@ -16,25 +16,26 @@
 	<div th:replace="common/header :: header_fragment"></div>
 	<div class="container">
 		<h1 class="mt-5">問題数を設定してください</h1>
-		<p>
-			選択中のテーマ: <span th:text="${themeName}"></span>
-		</p>
+		<div class="theme-info mt-3">
+			<h5>
+				クイズテーマ: <span th:text="${themeName}"></span>
+			</h5>
+			<!-- 			<p th:text="${themeDescription}"></p> -->
+		</div>
 		<p>
 			最大問題数: <span th:text="${maxQuestionCount}"></span>
 		</p>
-
-		<form action="/quiz/start" method="get">
-			<div class="form-group">
-				<label for="numOfQuestions">問題数:</label>
-				<!-- デフォルト値を最大問題数に設定 -->
-				<input type="number" class="form-control" name="numOfQuestions"
-					min="1" th:max="${maxQuestionCount}" th:value="${maxQuestionCount}"
-					required>
-			</div>
+		<form action="/quiz/start" method="get" class="form-inline">
+			<label for="numOfQuestions" class="mr-2">問題数:</label>
+			<!-- デフォルト値を最大問題数に設定 -->
+			<input type="number" class="form-control w-25 mr-2"
+				name="numOfQuestions" min="1" th:max="${maxQuestionCount}"
+				th:value="${maxQuestionCount}" required>
 			<!-- themeId を隠しフィールドとして追加 -->
 			<input type="hidden" name="themeId" th:value="${themeId}">
-
-			<button type="submit" class="btn btn-primary">スタート</button>
+			<div class="col text-right">
+				<button type="submit" class="btn btn-primary">スタート</button>
+			</div>
 		</form>
 	</div>
 	<!-- フッターを読み込む -->

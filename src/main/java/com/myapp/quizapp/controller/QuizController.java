@@ -1,5 +1,7 @@
 package com.myapp.quizapp.controller;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -53,7 +55,8 @@ public class QuizController {
 	private ThemeService themeService;
 
 	@GetMapping("/quiz/set-questions")
-	public String showQuizSetQuestionsPage(@RequestParam("themeId") long themeId, HttpSession session, Model model, HttpServletRequest request) {
+	public String showQuizSetQuestionsPage(@RequestParam("themeId") long themeId, HttpSession session, Model model,
+			HttpServletRequest request) {
 		Logger logger = LogManager.getLogger();
 		logger.error("★ ★ ★showQuizSetQuestionsPage Start");
 
@@ -63,7 +66,7 @@ public class QuizController {
 		logger.error("★selectedTheme.getIsAuthenticationRequired() ; " + selectedTheme.getIsAuthenticationRequired());
 		logger.error("★request.getUserPrincipal() ; " + request.getUserPrincipal());
 
-	    // 認証が必要なテーマの場合、ユーザーがログインしているかチェック
+		// 認証が必要なテーマの場合、ユーザーがログインしているかチェック
 //	    if (selectedTheme.getIsAuthenticationRequired() && request.getUserPrincipal() == null) {
 //	        // ログインページにリダイレクト
 //	        return "redirect:/quiz/login";
@@ -152,7 +155,13 @@ public class QuizController {
 
 		// セッションに themeId を保存
 		session.setAttribute("themeId", themeId);
-		
+
+		// クイズ開始時刻をセッションに保存（初回のみ）
+		if (session.getAttribute("quizStartTime") == null) {
+			LocalDateTime startTime = LocalDateTime.now();
+			session.setAttribute("quizStartTime", startTime);
+		}
+
 		logger.error("★★randomQuestions.size() : " + randomQuestions.size());
 		logger.error("★★selectedChoiceIds.size() : " + selectedChoiceIds.size());
 		logger.error("★★selectedChoiceIdMultipleChoiceLists.size() : " + selectedChoiceIdMultipleChoiceLists.size());
@@ -163,7 +172,18 @@ public class QuizController {
 	@GetMapping("/quiz/question/{currentQuestionIndex}")
 	public String getQuestion(@PathVariable int currentQuestionIndex, HttpSession session, Model model) {
 		Logger logger = LogManager.getLogger();
-		logger.trace("Start");
+		logger.trace("★Start getQuestion");
+
+		// セッションからテーマIDを取得
+		Long themeId = (Long) session.getAttribute("themeId");
+		if (themeId != null) {
+			Theme theme = themeService.getThemeById(themeId);
+			model.addAttribute("themeName", theme.getName());
+			model.addAttribute("themeDescription", theme.getDescription());
+		} else {
+			logger.error("★Theme ID not found in session.");
+		}
+		logger.error("★★★ themeId：" + themeId);
 
 		// ランダマイズされた質問リストをセッションから取得
 		List<Question> randomQuestions = (List<Question>) session.getAttribute("randomQuestions");
@@ -192,10 +212,21 @@ public class QuizController {
 		// 選択肢に質問を設定
 		choices.forEach(c -> c.setQuestion(currentQuestion));
 
-		// モデルに質問、選択肢、解説を追加
+		// 正解選択肢のIDリストを取得
+		List<Integer> correctChoiceIds = choices.stream().filter(Choice::isCorrect).map(Choice::getId)
+				.collect(Collectors.toList());
+		logger.error("★★correctChoiceIds : " + correctChoiceIds);
+
+		// 正解選択肢のリストをカンマ区切りの文字列に変換
+		String correctChoiceIdsString = correctChoiceIds.stream().map(String::valueOf).collect(Collectors.joining(","));
+
+		// モデルに質問、選択肢、解説、正解選択肢IDを追加
 		model.addAttribute("question", currentQuestion);
 		model.addAttribute("choices", choices);
 		model.addAttribute("explanation", explanation);
+		model.addAttribute("correctChoiceIds", correctChoiceIds); // 正解選択肢をモデルに追加
+		model.addAttribute("correctChoiceIdsString", correctChoiceIdsString); // 正解選択肢のリストをカンマ区切りの文字列をモデルに追加
+		model.addAttribute("questionId", currentQuestion.getId()); // 設問IDをモデルに追加
 
 		// セッションから numOfQuestions の値を取得してモデルに追加
 		Integer numOfQuestions = (Integer) session.getAttribute("numOfQuestions");
@@ -504,6 +535,72 @@ public class QuizController {
 		return ResponseEntity.ok("Answer submitted!");
 	}
 
+	@GetMapping("/quiz/confirm-scoring-direct")
+	public String confirmScoringDirect(HttpSession session, Model model, RedirectAttributes redirectAttributes) {
+		Logger logger = LogManager.getLogger();
+		logger.error("★★★confirmScoringDirect Start");
+
+//		// セッションからランダムな質問を取得
+//		List<Question> randomQuestions = (List<Question>) session.getAttribute("randomQuestions");
+
+		// 択一用：セッションからこれまでの選択結果リストを取得
+		List<Integer> selectedChoiceIds = (List<Integer>) session.getAttribute("selectedChoiceIds");
+		logger.error("★★★selectedChoiceIds : " + selectedChoiceIds);
+
+		// 択一用：選択が保存されていない場合、新しいリストを作成
+		if (selectedChoiceIds == null) {
+			logger.error("★★★selectedChoiceIds == null");
+			selectedChoiceIds = new ArrayList<>();
+		}
+
+		// 択複用：セッションからこれまでの選択結果リストを取得
+		List<List<Integer>> selectedChoiceIdMultipleChoiceLists = (List<List<Integer>>) session
+				.getAttribute("selectedChoiceIdMultipleChoiceLists");
+		if (selectedChoiceIdMultipleChoiceLists == null) {
+			selectedChoiceIdMultipleChoiceLists = new ArrayList<>();
+		}
+		logger.error("★★★selectedChoiceIdMultipleChoiceLists : " + selectedChoiceIdMultipleChoiceLists);
+
+		// 今何問目かを取得
+		Integer currentQuestionIndex = (Integer) session.getAttribute("currentQuestionIndex");
+
+		// セッションから numOfQuestions の値を取得
+		Integer numOfQuestions = (Integer) session.getAttribute("numOfQuestions");
+
+		// 次に遷移する currentQuestionIndex に対応する択複回答リストを抽出
+		List<Integer> selectedChoiceIdMultipleChoiceList = new ArrayList<>();
+		if (currentQuestionIndex != null && currentQuestionIndex < numOfQuestions) {
+			selectedChoiceIdMultipleChoiceList = selectedChoiceIdMultipleChoiceLists.get(currentQuestionIndex);
+		}
+		logger.error("★★★★★★currentQuestionIndex : " + currentQuestionIndex);
+		logger.error("★★★★★★selectedChoiceIdMultipleChoiceList : " + selectedChoiceIdMultipleChoiceList);
+		logger.error("★★★★★★selectedChoiceIds : " + selectedChoiceIds);
+
+		// selectedChoiceIdMultipleChoiceList をカンマ区切りの文字列に変換
+		String selectedChoiceIdMultipleChoiceListString = selectedChoiceIdMultipleChoiceList.stream()
+				.map(String::valueOf).collect(Collectors.joining(","));
+		logger.error("★★★★★★selectedChoiceIdMultipleChoiceListString : " + selectedChoiceIdMultipleChoiceListString);
+
+		// 択複用：文字列としてビューに渡す
+		redirectAttributes.addFlashAttribute("selectedChoiceIdMultipleChoiceList", selectedChoiceIdMultipleChoiceList);
+		redirectAttributes.addFlashAttribute("selectedChoiceIdMultipleChoiceListString",
+				selectedChoiceIdMultipleChoiceListString);
+		model.addAttribute("selectedChoiceIdMultipleChoiceList", selectedChoiceIdMultipleChoiceList);
+		model.addAttribute("selectedChoiceIdMultipleChoiceListString", selectedChoiceIdMultipleChoiceListString);
+//		model.addAttribute("teststr", "aaa");
+//		redirectAttributes.addFlashAttribute("testlst", selectedChoiceIdMultipleChoiceList);
+//		redirectAttributes.addFlashAttribute("teststr", "bbb");
+//		model.addAttribute("testids", selectedChoiceIds);
+
+		// セッションに選択リストを保存
+		session.setAttribute("selectedChoiceIds", selectedChoiceIds);
+		session.setAttribute("selectedChoiceIdMultipleChoiceLists", selectedChoiceIdMultipleChoiceLists);
+		session.setAttribute("selectedChoiceIdMultipleChoiceListString", selectedChoiceIdMultipleChoiceListString);
+
+		// 確認ページへリダイレクト
+		return "confirm-scoring";
+	}
+
 	@GetMapping("/quiz/check-answer")
 	public String checkAnswer(HttpSession session, Model model) {
 		// 回答を確認する処理
@@ -573,6 +670,18 @@ public class QuizController {
 		Logger logger = LogManager.getLogger();
 		logger.error("★★★ /quiz/quiz-result Start");
 
+		// セッションからテーマIDを取得
+		Long themeId = (Long) session.getAttribute("themeId");
+		if (themeId != null) {
+			Theme theme = themeService.getThemeById(themeId);
+			model.addAttribute("themeName", theme.getName());
+			model.addAttribute("themeDescription", theme.getDescription());
+		} else {
+			logger.error("★Theme ID not found in session.");
+		}
+//		long themeId = (long) session.getAttribute("themeId");
+		logger.error("★★★ themeId：" + themeId);
+
 		// セッションから採点結果を取得
 		Integer userScore = (Integer) session.getAttribute("userScore");
 		logger.error("★★★ userScore：" + userScore);
@@ -582,8 +691,6 @@ public class QuizController {
 		logger.error("★★★ numOfQuestions：" + numOfQuestions);
 
 		// セッションから質問数を取得
-		long themeId = (long) session.getAttribute("themeId");
-		logger.error("★★★ themeId：" + themeId);
 
 		// 必要に応じて他の採点結果情報も取得
 
@@ -604,6 +711,36 @@ public class QuizController {
 		// 正誤情報と質問をビューに渡す
 		List<AnswerStatus> answerStatuses = (List<AnswerStatus>) session.getAttribute("answerStatuses");
 		model.addAttribute("answerStatuses", answerStatuses);
+
+		// クイズ開始時間を取得
+		LocalDateTime quizStartTime = (LocalDateTime) session.getAttribute("quizStartTime");
+		LocalDateTime quizEndTime = LocalDateTime.now(); // 採点結果ページ遷移時の時間
+
+		// 経過時間を計算
+		String elapsedTimeStr = "N/A"; // デフォルト
+		if (quizStartTime != null) {
+			Duration duration = Duration.between(quizStartTime, quizEndTime);
+			long minutes = duration.toMinutes();
+			long seconds = duration.toSeconds() % 60;
+			elapsedTimeStr = minutes + "分 " + seconds + "秒";
+		}
+
+		// ログに出力
+		logger.error("★★★ クイズ開始時刻：" + quizStartTime);
+		logger.error("★★★ クイズ終了時刻：" + quizEndTime);
+		logger.error("★★★ クイズ所要時間：" + elapsedTimeStr);
+
+		// ビューに渡す
+		model.addAttribute("quizElapsedTime", elapsedTimeStr);
+
+		// 正答率を計算
+		String accuracyRate = "N/A";
+		if (userScore != null && numOfQuestions != null && numOfQuestions > 0) {
+			double rate = ((double) userScore / numOfQuestions) * 100;
+			accuracyRate = String.format("%.1f%%", rate); // 小数点1桁で表示
+		}
+		logger.error("★★★ 正答率：" + accuracyRate);
+		model.addAttribute("accuracyRate", accuracyRate);
 
 		return "quiz-result";
 	}

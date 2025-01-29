@@ -14,8 +14,51 @@
 	<div th:replace="common/header :: header_fragment"></div>
 	<div class="container">
 		<hr>
-		<h6 class="mt-5"
-			th:text="'問題数 : ' + ${currentQuestionIndex} + '/' + ${numOfQuestions}"></h6>
+		<div class="d-flex justify-content-between mt-3">
+			<h6>
+				クイズ開始からの経過時間: <span id="quizElapsedTime">0分 0秒</span>
+			</h6>
+			<h6 class="text-right">
+				この画面を開いてからの経過時間: <span id="questionElapsedTime">0分 0秒</span>
+			</h6>
+		</div>
+		<div class="theme-info mt-3">
+			<h5>
+				クイズテーマ: <span th:text="${themeName}"></span>
+			</h5>
+			<!-- 			<p th:text="${themeDescription}"></p> -->
+		</div>
+		<div class="d-flex justify-content-between mt-3">
+			<h6
+				th:text="'問題数 : ' + ${currentQuestionIndex} + '/' + ${numOfQuestions}"></h6>
+			<h6 class="text-right">
+				設問ID : <span th:text="${questionId}"></span>
+			</h6>
+		</div>
+
+		<hr>
+		<div class="row mt-4">
+			<!-- 前に戻るフォーム -->
+			<!-- 左端に配置するためのカラム -->
+			<div class="col text-left">
+				<form id="previousQuestionForm" action="/quiz/previous-question"
+					method="get">
+					<!-- currentQuestionId のための非表示の入力フィールドを追加 -->
+					<input type="hidden" name="currentQuestionId"
+						th:value="${question.id}">
+					<button type="button" class="btn btn-secondary">前に戻る</button>
+				</form>
+			</div>
+			<!-- 採点確認画面へ進むボタン -->
+			<div class="col text-center">
+				<button id="confirmScoringBtn" class="btn btn-secondary">採点確認画面へ進む</button>
+			</div>
+			<!-- 次へ進むフォーム -->
+			<!-- 右端に配置するためのカラム -->
+			<div class="col text-right">
+				<button id="nextQuestionBtn" class="btn btn-secondary">次へ進む</button>
+			</div>
+		</div>
 		<hr>
 		<h4>質問:</h4>
 		<!-- 改行をreplaceで表現 -->
@@ -50,6 +93,16 @@
 					</div>
 				</div>
 			</div>
+
+			<!-- 正解選択肢IDを埋め込む隠しフィールド -->
+			<!-- <input type="hidden" id="correctChoiceIds"
+				th:value="${#json.toJson(correctChoiceIds)}"> -->
+			<input type="hidden" id="correctChoiceIds"
+				th:value="${correctChoiceIdsString}">
+
+			<!-- クイズ開始時刻を取得（サーバー時間） -->
+			<input type="hidden" id="quizStartTime"
+				th:value="${session.quizStartTime}">
 
 			<!-- 複数選択肢内容確認用の隠しフィールドを追加 -->
 			<input type="hidden" id="selectedChoiceIdMultipleChoiceListValue"
@@ -87,32 +140,21 @@
 		<h4>解説:</h4>
 		<!-- 解説を表示 -->
 		<div id="explanation" style="display: none" th:if="${explanation}">
-			<p  id="explanation_p"><span th:utext="${#strings.replace(explanation.explanationText, '\n', '<br>')}">
-			</span></p>
-		</div><hr>
-		<!-- 前に戻るフォーム -->
-		<div class="row">
-			<!-- 左端に配置するためのカラム -->
-			<div class="col text-left">
-				<form id="previousQuestionForm" action="/quiz/previous-question"
-					method="get">
-					<!-- currentQuestionId のための非表示の入力フィールドを追加 -->
-					<input type="hidden" name="currentQuestionId"
-						th:value="${question.id}">
-					<button type="button" class="btn btn-secondary">前に戻る</button>
-				</form>
-			</div>
-			<!-- 次へ進むフォーム -->
-			<!-- 右端に配置するためのカラム -->
-			<div class="col text-right">
-				<button id="nextQuestionBtn" class="btn btn-secondary">次へ進む</button>
-			</div>
+			<p id="explanation_p">
+				<span
+					th:utext="${#strings.replace(explanation.explanationText, '\n', '<br>')}">
+				</span>
+			</p>
 		</div>
+		<hr>
+
 	</div>
 	<!-- フッターを読み込む -->
 	<div th:replace="common/footer :: footer_fragment"></div>
 	<!-- JavaScriptファイルを読み込む -->
 	<script src="/js/quiz.js"></script>
+	<script src="/js/quiz_timer.js"></script>
+	<script src="/js/navigation.js"></script>
 	<script src="/js/ajax_set_choice.js"></script>
 	<script src="/js/randomize_choices.js"></script>
 </body>
