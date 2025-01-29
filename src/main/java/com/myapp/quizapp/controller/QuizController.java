@@ -156,11 +156,10 @@ public class QuizController {
 		// セッションに themeId を保存
 		session.setAttribute("themeId", themeId);
 
-		// クイズ開始時刻をセッションに保存（初回のみ）
-		if (session.getAttribute("quizStartTime") == null) {
-			LocalDateTime startTime = LocalDateTime.now();
-			session.setAttribute("quizStartTime", startTime);
-		}
+	    // クイズ開始時刻を必ず新規セット
+	    LocalDateTime startTime = LocalDateTime.now();
+	    session.setAttribute("quizStartTime", startTime);
+	    logger.error("★★★ クイズ開始時刻を新規セット: " + startTime);
 
 		logger.error("★★randomQuestions.size() : " + randomQuestions.size());
 		logger.error("★★selectedChoiceIds.size() : " + selectedChoiceIds.size());
@@ -723,6 +722,10 @@ public class QuizController {
 			long minutes = duration.toMinutes();
 			long seconds = duration.toSeconds() % 60;
 			elapsedTimeStr = minutes + "分 " + seconds + "秒";
+
+			// クイズ所要時間を計算後、セッションから `quizStartTime` を削除
+			session.removeAttribute("quizStartTime");
+			logger.error("★★★ quizStartTime セッション削除");
 		}
 
 		// ログに出力
