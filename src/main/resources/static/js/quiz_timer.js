@@ -1,4 +1,4 @@
-// 経過時間表示用
+　// 経過時間表示用
 function formatTime(seconds) {
     let minutes = Math.floor(seconds / 60);
     let remainingSeconds = seconds % 60;
@@ -10,7 +10,12 @@ function updateQuizElapsedTime() {
     let quizStartTimeStr = document.getElementById("quizStartTime")?.value;
     if (!quizStartTimeStr) return;
 
+    // `quizStartTimeStr` を Date オブジェクトに変換
     let quizStartTime = new Date(quizStartTimeStr);
+    if (isNaN(quizStartTime.getTime())) {
+        console.error("Invalid quizStartTime:", quizStartTimeStr);
+        return;
+    }
     let now = new Date();
     let elapsedSeconds = Math.floor((now - quizStartTime) / 1000);
     

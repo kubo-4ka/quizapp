@@ -2,6 +2,8 @@ package com.myapp.quizapp.controller;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -156,10 +158,22 @@ public class QuizController {
 		// セッションに themeId を保存
 		session.setAttribute("themeId", themeId);
 
-	    // クイズ開始時刻を必ず新規セット
+	    // 現在のシステムタイムゾーンを取得
+	    ZoneId systemZone = ZoneId.systemDefault();
+	    logger.error("★★★ 現在のシステムタイムゾーン: " + systemZone);
+
+	    // UTC で記録するが、システムタイムゾーンが UTC なら JST に変換
 	    LocalDateTime startTime = LocalDateTime.now();
+	    if (systemZone.equals(ZoneId.of("UTC"))) {
+	        ZonedDateTime startTimeJST = startTime.atZone(ZoneId.of("UTC")).withZoneSameInstant(ZoneId.of("Asia/Tokyo"));
+	        startTime = startTimeJST.toLocalDateTime();
+	        logger.error("★★★ UTC 環境のため JST に変換: " + startTime);
+	    } else {
+	        logger.error("★★★ JST 環境のためそのまま保存: " + startTime);
+	    }
+	    // クイズ開始時間をセッションに保存
 	    session.setAttribute("quizStartTime", startTime);
-	    logger.error("★★★ クイズ開始時刻を新規セット: " + startTime);
+	    logger.error("★★★ クイズ開始時刻をセッションに保存: " + session.getAttribute("quizStartTime"));
 
 		logger.error("★★randomQuestions.size() : " + randomQuestions.size());
 		logger.error("★★selectedChoiceIds.size() : " + selectedChoiceIds.size());
@@ -711,27 +725,40 @@ public class QuizController {
 		List<AnswerStatus> answerStatuses = (List<AnswerStatus>) session.getAttribute("answerStatuses");
 		model.addAttribute("answerStatuses", answerStatuses);
 
-		// クイズ開始時間を取得
-		LocalDateTime quizStartTime = (LocalDateTime) session.getAttribute("quizStartTime");
-		LocalDateTime quizEndTime = LocalDateTime.now(); // 採点結果ページ遷移時の時間
+	    // クイズ開始時間を取得
+	    LocalDateTime quizStartTime = (LocalDateTime) session.getAttribute("quizStartTime");
+	    LocalDateTime quizEndTime = LocalDateTime.now();
+	    
+	    // 現在のシステムタイムゾーンを取得
+	    ZoneId systemZone = ZoneId.systemDefault();
+	    logger.error("★★★ 現在のシステムタイムゾーン: " + systemZone);
 
-		// 経過時間を計算
-		String elapsedTimeStr = "N/A"; // デフォルト
-		if (quizStartTime != null) {
-			Duration duration = Duration.between(quizStartTime, quizEndTime);
-			long minutes = duration.toMinutes();
-			long seconds = duration.toSeconds() % 60;
-			elapsedTimeStr = minutes + "分 " + seconds + "秒";
+	    // UTC 環境なら JST に変換
+	    if (systemZone.equals(ZoneId.of("UTC"))) {
+	        ZonedDateTime quizEndTimeJST = quizEndTime.atZone(ZoneId.of("UTC")).withZoneSameInstant(ZoneId.of("Asia/Tokyo"));
+	        quizEndTime = quizEndTimeJST.toLocalDateTime();
+	        logger.error("★★★ UTC 環境のため JST に変換: " + quizEndTime);
+	    } else {
+	        logger.error("★★★ JST 環境のためそのまま使用: " + quizEndTime);
+	    }
 
-			// クイズ所要時間を計算後、セッションから `quizStartTime` を削除
-			session.removeAttribute("quizStartTime");
-			logger.error("★★★ quizStartTime セッション削除");
-		}
+	    // 経過時間を計算
+	    String elapsedTimeStr = "N/A";
+	    if (quizStartTime != null) {
+	        Duration duration = Duration.between(quizStartTime, quizEndTime);
+	        long minutes = duration.toMinutes();
+	        long seconds = duration.toSeconds() % 60;
+	        elapsedTimeStr = minutes + "分 " + seconds + "秒";
+
+	        // クイズ所要時間を計算後、セッションから `quizStartTime` を削除
+	        session.removeAttribute("quizStartTime");
+	        logger.error("★★★ quizStartTime セッション削除");
+	    }
 
 		// ログに出力
-		logger.error("★★★ クイズ開始時刻：" + quizStartTime);
-		logger.error("★★★ クイズ終了時刻：" + quizEndTime);
-		logger.error("★★★ クイズ所要時間：" + elapsedTimeStr);
+	    logger.error("★★★ クイズ開始時刻: " + quizStartTime);
+	    logger.error("★★★ クイズ終了時刻: " + quizEndTime);
+	    logger.error("★★★ クイズ所要時間: " + elapsedTimeStr);
 
 		// ビューに渡す
 		model.addAttribute("quizElapsedTime", elapsedTimeStr);
